@@ -429,7 +429,7 @@
             return result;
         }
 
-           async function fetchShows() {
+ async function fetchShows() {
             const listElement = document.getElementById('shows-list');
             try {
                 const response = await fetch(SHEET_CSV_URL);
@@ -441,13 +441,30 @@
                 const shows = rows.map(line => {
                     if (!line.trim()) return null;
                     const columns = parseCSVLine(line);
+                    const rawDate = columns[0] || '';
+                    const timestamp = Date.parse(rawDate);
+                    
+                    // Formatting the date to: "Thursday, January 29, 2026, 5:00 PM"
+                    let formattedDate = rawDate;
+                    if (!isNaN(timestamp)) {
+                        const dateObj = new Date(timestamp);
+                        formattedDate = dateObj.toLocaleString('en-US', {
+                            weekday: 'long',
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                        });
+                    }
+
                     return {
-                        dateStr: columns[0] || '',
+                        dateStr: formattedDate,
                         venue: columns[1] || '',
                         link: columns[2] || '#',
                         title: columns[3] || 'Performance',
-                        // Create a date object for sorting logic
-                        timestamp: Date.parse(columns[0]) || 0
+                        timestamp: isNaN(timestamp) ? 0 : timestamp
                     };
                 }).filter(show => show !== null);
 
@@ -476,6 +493,7 @@
                 listElement.innerHTML = '<li>Error loading schedule.</li>';
             }
         }
+
 
     function enterSite() {
         const splash = document.getElementById('splash-screen');
