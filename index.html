@@ -429,7 +429,7 @@
             return result;
         }
 
- async function fetchShows() {
+        async function fetchShows() {
             const listElement = document.getElementById('shows-list');
             try {
                 const response = await fetch(SHEET_CSV_URL);
@@ -444,19 +444,29 @@
                     const rawDate = columns[0] || '';
                     const timestamp = Date.parse(rawDate);
                     
-                    // Formatting the date to: "Thursday, January 29, 2026, 5:00 PM"
+                    // Formatting logic
                     let formattedDate = rawDate;
                     if (!isNaN(timestamp)) {
                         const dateObj = new Date(timestamp);
-                        formattedDate = dateObj.toLocaleString('en-US', {
+                        
+                        // Check if a specific time was likely intended.
+                        // If it's exactly midnight (00:00), we assume no time was provided.
+                        const hasTime = dateObj.getHours() !== 0 || dateObj.getMinutes() !== 0;
+
+                        const options = {
                             weekday: 'long',
                             month: 'long',
                             day: 'numeric',
-                            year: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true
-                        });
+                            year: 'numeric'
+                        };
+
+                        if (hasTime) {
+                            options.hour = 'numeric';
+                            options.minute = '2-digit';
+                            options.hour12 = true;
+                        }
+
+                        formattedDate = dateObj.toLocaleString('en-US', options);
                     }
 
                     return {
@@ -493,7 +503,6 @@
                 listElement.innerHTML = '<li>Error loading schedule.</li>';
             }
         }
-
 
     function enterSite() {
         const splash = document.getElementById('splash-screen');
