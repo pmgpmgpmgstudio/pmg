@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedro M. Gutierrez</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow: hidden; 
+            background-color: black;
+        }
+
+        /* Splash Screen Styles */
+        #splash-screen {
+            position: fixed;
+            inset: 0;
+            background: black;
+            color: white;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease-in-out;
+            padding: 40px;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px; 
+            width: 100%;
+            max-width: 1300px;
+            opacity: 0.8; 
+            transition: opacity 0.5s ease;
+        }
+
+        @media (max-width: 768px) {
+            .video-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+        }
+
+        .grid-item {
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            background: #111;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+
+        .video-grid video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(1.1);
+            transition: transform 12s linear;
+        }
+
+        .enter-container {
+            grid-column: span 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        @media (min-width: 769px) {
+            .enter-container {
+                grid-column: 2;
+                grid-row: 2;
+            }
+        }
+
+        /* Main Site Styles */
+        #main-content {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #fcfcfc;
+            color: black;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.8s ease;
+        }
+
+        #main-content.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        header {
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .branding {
+            line-height: 1.1;
+            font-weight: 500;
+            font-size: 1.1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-item {
+            cursor: pointer;
+            padding: 2px 10px; 
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            font-size: 0.9rem;
+        }
+
+        .nav-item.active {
+            border: 1px solid black;
+        }
+
+        .scroll-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            scrollbar-width: thin;
+        }
+
+        .work-item {
+            margin-bottom: 6rem;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .work-item video, .work-item img, .work-item .video-container {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            max-height: 80vh; /* Prevents image from being taller than 80% of screen */
+            display: block;
+            margin-bottom: 1.5rem;
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 ratio */
+            height: 0;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .work-caption {
+            text-align: center;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+        }
+
+        .music-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            .music-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section-title {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        .music-link {
+            transition: opacity 0.2s ease;
+        }
+
+        .music-link:hover {
+            opacity: 0.6;
+        }
+
+            /* About Page Styles */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 240px 1fr; /* Reduced size on desktop too for consistency */
+            gap: 4rem;
+            max-width: 1000px;
+            margin: 2rem auto;
+            align-items: start;
+        }
+
+        @media (max-width: 768px) {
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                justify-items: center; /* Center-align content for mobile */
+            }
+            .portrait-container {
+                max-width: 180px; /* Even smaller on mobile */
+                margin: 0 auto;
+            }
+            .bio-content {
+                text-align: center; /* Optional: centers bio text on mobile */
+            }
+        }
+
+        .portrait-container img {
+            width: 100%;
+            height: auto;
+            filter: grayscale(100%);
+        }
+
+        .bio-content {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <div class="video-grid" id="splash-grid">
+            <div class="grid-item"><img src="assets/burnice.gif" alt="Burn Ice"></div>
+            <div class="grid-item"><video autoplay muted loop playsinline><source src="https://v.ftcdn.net/05/14/06/13/700_F_514061301_Doj1IatBv6n1Y8BscYwWpT6oUqN69p8p_ST.mp4" type="video/mp4"></video></div>
+            <div class="grid-item"><video autoplay muted loop playsinline><source src="https://v.ftcdn.net/02/79/11/48/700_F_279114886_H9V9eUAn8F3LREyM6CqVpUf3YqA9n8zN_ST.mp4" type="video/mp4"></video></div>
+            
+            <div class="grid-item"><video autoplay muted loop playsinline><source src="https://v.ftcdn.net/03/11/87/43/700_F_311874313_jI8Y1T6QJ7G3N9jK6L0vK1X7Xk9B8H3C_ST.mp4" type="video/mp4"></video></div>
+            
+            <div class="enter-container">
+                <button onclick="enterSite()" class="border-2 border-white px-12 py-5 bg-black hover:bg-white hover:text-black transition-all duration-500 uppercase tracking-[0.5em] text-[10px] md:text-sm font-bold z-50 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                    Enter
+                </button>
+            </div>
+
+            <div class="grid-item"><video autoplay muted loop playsinline><source src="https://v.ftcdn.net/01/71/61/52/700_F_171615217_7C3yvF0I3S1fI5JzHw6vLhT9p6R1eL_ST.mp4" type="video/mp4"></video></div>
+            
+            <div class="grid-item"><video autoplay muted loop playsinline><source src="https://v.ftcdn.net/02/26/50/20/700_F_226502018_lC9E5S9n5j7v4S9h9jK6L0vK1X7Xk9B8_ST.mp4" type="video/mp4"></video></div>
+            <div class="grid-item"><video autoplay muted loop playsinline><source src="https://v.ftcdn.net/04/55/44/21/700_F_455442183_9mC4E7N6SPrfTdf057jU3G6S99v4WpB2_ST.mp4" type="video/mp4"></video></div>
+            <div class="grid-item"><video autoplay muted loop playsinline><source src="https://v.ftcdn.net/02/90/57/57/700_F_290575718_9mC4E7N6SPrfTdf057jU3G6S99v4WpB2_ST.mp4" type="video/mp4"></video></div>
+        </div>
+    </div>
+
+    <!-- Main Site -->
+    <div id="main-content">
+        <header class="py-4 px-8 flex flex-row justify-between items-center bg-white sticky top-0 z-10">
+            <div class="branding" onclick="showPage('about', null)">
+                <span>Pedro</span>
+                <span>M.</span>
+                <span>Gutierrez</span>
+            </div>
+            
+            <nav class="flex gap-2">
+                <div class="nav-item active" onclick="showPage('video', this)">Video</div>
+                <div class="nav-item" onclick="showPage('images', this)">Images</div>
+                <div class="nav-item" onclick="showPage('painting', this)">Painting</div>
+                <div class="nav-item" onclick="showPage('music', this)">Music</div>
+            </nav>
+        </header>
+
+        <div id="page-content" class="scroll-container">
+            <!-- about page -->
+            <div id="about-page" class="page-view hidden">
+                <div class="about-grid">
+                    <div class="portrait-container">
+                        <img src="https://f4.bcbits.com/img/0019527118_21.jpg" alt="Pedro M. Gutierrez Portrait">
+                    </div>
+                    <div class="bio-content">
+                        <h2 class="section-title">About</h2>
+                        <p class="mb-4">
+                            Pedro M. Gutierrez is a multi-disciplinary artist working across the fields of experimental video, photography, and sound. His work explores the intersection of digital decay, temporal perception, and the materiality of the moving image.
+                        </p>
+                        <p class="mb-4">
+                            Based in Milwaukee, Gutierrez has exhibited works at various experimental film festivals and local galleries.
+                        </p>
+                        <p>
+                            Through the moniker PMGPMGPMG, he releases sonic explorations that mirror the visual textures of his filmic work.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- video page -->
+            <div id="video-page" class="page-view">
+                <div class="work-item">
+                    <div class="video-container">
+                        <iframe 
+                            src="https://www.youtube.com/embed/bl_52YedL6c?si=JkoY2c9Vwxpvrniq" 
+                            title="YouTube video player" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            referrerpolicy="strict-origin-when-cross-origin" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                    <div class="work-caption">
+                        <strong>Lumina Phase I</strong><br>
+                        Experimental Video, 2024
+                    </div>
+                </div>
+            </div>
+
+            <!-- image page -->
+            <div id="images-page" class="page-view hidden">
+                <div class="work-item">
+                    <img src="https://f4.bcbits.com/img/a3141291384_16.jpg" alt="Nowism">
+                    <div class="work-caption"><strong>Nowism</strong><br>Photography Series, 20xx</div>
+                </div>
+                <div class="work-item">
+                    <img src="https://f4.bcbits.com/img/a2217704897_16.jpg" alt="POST_MOMENTUM">
+                    <div class="work-caption"><strong>POST_MOMENTUM</strong><br>Photography Series, 20xx</div>
+                </div>
+                <div class="work-item">
+                    <img src="assets/photos/splatter.jpg" alt="Splatter">
+                    <div class="work-caption"><strong>Splatter</strong><br>Photography Series, 20xx</div>
+                </div>
+            </div>
+
+            <!-- painting page -->
+            <div id="painting-page" class="page-view hidden">
+                <div class="work-item">
+                    <img src="assets/photos/studioshot.jpg" alt="Studioshot">
+                    <div class="work-caption"><strong>Studioshot</strong><br>Oil on Canvas, 20xx</div>
+                </div>
+            </div>
+
+            <!-- music page -->
+            <div id="music-page" class="page-view hidden">
+                <div class="music-grid">
+
+                 <!-- shows column -->
+                    <section>
+                        <h2 class="section-title">Shows</h2>
+                        <ul class="space-y-6 text-sm">
+                            <li>
+                                <a href="https://mkeshows.com/event/snek-trio-pedro-m-gutierrez-owen-davies" target="_blank" class="music-link block group">
+                                    <div class="flex justify-between items-end">
+                                        <div>
+                                            <div class="font-bold">Snek Trio, Pedro M. Gutierrez, Owen Davies</div>
+                                            <div>Jazz Gallery Center for the Arts, Milwaukee</div>
+                                            <div class="text-gray-500">Jan 30, 2026</div>
+                                        </div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1 opacity-0 group-hover:opacity-100 transition-opacity"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://jazzgallerycenterforarts.org/events/08/8/2025/music" target="_blank" class="music-link block group">
+                                    <div class="flex justify-between items-end">
+                                        <div>
+                                            <div class="font-bold">Adam Shead/Stephan Haluska (Chicago/Cleveland) + Pedro M. Gutierrez</div>
+                                            <div>Jazz Gallery Center for the Arts, Milwaukee</div>
+                                            <div class="text-gray-500">Aug 8, 2025</div>
+                                        </div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1 opacity-0 group-hover:opacity-100 transition-opacity"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+
+                <!-- recordings column -->
+                    <section>
+                        <h2 class="section-title">Recordings</h2>
+                        <ul class="space-y-8">
+                            <li>
+                                <a href="https://pmgpmgpmg.bandcamp.com/album/post-momentum" target="_blank" class="music-link flex gap-4 items-center group">
+                                    <div class="w-16 h-16 bg-gray-200 flex items-center justify-center overflow-hidden">
+                                        <img src="https://f4.bcbits.com/img/a2217704897_16.jpg" alt="POST_MOMENTUM Art" class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="flex-grow">
+                                        <div class="flex justify-between items-center">
+                                            <div class="font-bold">POST_MOMENTUM</div>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-40 group-hover:opacity-100 transition-opacity"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                                        </div>
+                                        <div class="text-xs text-gray-400">Available on Bandcamp</div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://pmgpmgpmg.bandcamp.com/album/nowism" target="_blank" class="music-link flex gap-4 items-center group">
+                                    <div class="w-16 h-16 bg-gray-200 flex items-center justify-center overflow-hidden">
+                                        <img src="https://f4.bcbits.com/img/a3141291384_16.jpg" alt="Nowism Art" class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="flex-grow">
+                                        <div class="flex justify-between items-center">
+                                            <div class="font-bold">Nowism</div>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-40 group-hover:opacity-100 transition-opacity"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                                        </div>
+                                        <div class="text-xs text-gray-400">Available on Bandcamp</div>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+        function enterSite() {
+            const splash = document.getElementById('splash-screen');
+            const main = document.getElementById('main-content');
+            
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.display = 'none';
+                main.classList.add('visible');
+            }, 1000);
+        }
+
+        function showPage(pageId, navElement) {
+            // 1. Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            // 2. ONLY add active class if an element was passed (prevents error when clicking name)
+            if (navElement) {
+                navElement.classList.add('active');
+            }
+            
+            // 3. Hide all page views
+            document.querySelectorAll('.page-view').forEach(page => page.classList.add('hidden'));
+            
+            // 4. Show the target page
+            const targetPage = document.getElementById(pageId + '-page');
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+            }
+            
+            // 5. Reset scroll to top
+            document.getElementById('page-content').scrollTop = 0;
+        }
+
+        window.onload = () => {
+            const videos = document.querySelectorAll('#splash-screen video');
+            setTimeout(() => {
+                videos.forEach(v => {
+                    v.style.transform = 'scale(1.15)';
+                    v.play().catch(e => console.log("Auto-play blocked"));
+                });
+            }, 100);
+        };
+    </script>
+</body>
+</html>
