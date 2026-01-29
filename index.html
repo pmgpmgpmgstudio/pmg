@@ -341,6 +341,9 @@
                  <!-- shows column -->
                     <section>
                         <h2 class="section-title">Shows</h2>
+                        <ul id="shows-list" class="space-y-6 text-sm">
+                            <li class="animate-pulse text-gray-400">Syncing with performance schedule...</li>
+                        </ul>
                         <ul class="space-y-6 text-sm">
                             <li>
                                 <a href="https://mkeshows.com/event/snek-trio-pedro-m-gutierrez-owen-davies" target="_blank" class="music-link block group">
@@ -409,48 +412,83 @@
     </div>
 
 <script>
-        function enterSite() {
-            const splash = document.getElementById('splash-screen');
-            const main = document.getElementById('main-content');
-            
-            splash.style.opacity = '0';
-            setTimeout(() => {
-                splash.style.display = 'none';
-                main.classList.add('visible');
-            }, 1000);
-        }
+    // Link to your published Google Sheets CSV
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAEhKGCaI7hBfJ3O6HZB2dFSLMQmW6Fu87798L7-YazMQwm8gW5bOG-lDcjcVl7E-jh5teZk49AIB8/pub?output=csv';
 
-        function showPage(pageId, navElement) {
-            // 1. Remove active class from all nav items
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    async function fetchShows() {
+        const listElement = document.getElementById('shows-list');
+        try {
+            const response = await fetch(SHEET_CSV_URL);
+            const data = await response.text();
             
-            // 2. ONLY add active class if an element was passed (prevents error when clicking name)
-            if (navElement) {
-                navElement.classList.add('active');
-            }
-            
-            // 3. Hide all page views
-            document.querySelectorAll('.page-view').forEach(page => page.classList.add('hidden'));
-            
-            // 4. Show the target page
-            const targetPage = document.getElementById(pageId + '-page');
-            if (targetPage) {
-                targetPage.classList.remove('hidden');
-            }
-            
-            // 5. Reset scroll to top
-            document.getElementById('page-content').scrollTop = 0;
-        }
+            // Parse CSV rows, skip the header row
+            const rows = data.split('\n').slice(1); 
+            let html = '';
 
-        window.onload = () => {
-            const videos = document.querySelectorAll('#splash-screen video');
-            setTimeout(() => {
-                videos.forEach(v => {
-                    v.style.transform = 'scale(1.15)';
-                    v.play().catch(e => console.log("Auto-play blocked"));
-                });
-            }, 100);
-        };
-    </script>
+            rows.forEach((row, index) => {
+                // Regex to handle commas inside quotes in CSV
+                const columns = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || row.split(',');
+                if (!columns || columns.length < 2) return;
+
+                const date = columns[0].replace(/"/g, '').trim();
+                const venue = columns[1].replace(/"/g, '').trim();
+                const link = columns[2] ? columns[2].replace(/"/g, '').trim() : '#';
+                const title = columns[3] ? columns[3].replace(/"/g, '').trim() : '';
+
+                html += `
+                    <li>
+                        <a href="${link}" target="_blank" class="music-link block group ${index > 0 ? 'border-t border-gray-100 pt-4' : ''}">
+                            <div class="flex justify-between items-end">
+                                <div>
+                                    ${title ? `<div class="uppercase tracking-widest text-[10px] text-gray-400 mb-0.5">${title}</div>` : ''}
+                                    <div class="font-bold text-base leading-tight">${venue}</div>
+                                    <div class="text-gray-500 font-light">${date}</div>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1 opacity-0 group-hover:opacity-100 transition-opacity"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                            </div>
+                        </a>
+                    </li>
+                `;
+            });
+
+            listElement.innerHTML = html || '<li class="text-gray-400 italic">No upcoming shows found.</li>';
+        } catch (error) {
+            console.error("Error fetching shows:", error);
+            listElement.innerHTML = '<li class="text-red-500">Error loading schedule.</li>';
+        }
+    }
+
+    function enterSite() {
+        const splash = document.getElementById('splash-screen');
+        const main = document.getElementById('main-content');
+        splash.style.opacity = '0';
+        setTimeout(() => {
+            splash.style.display = 'none';
+            main.classList.add('visible');
+        }, 1000);
+    }
+
+    function showPage(pageId, navElement) {
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        if (navElement) navElement.classList.add('active');
+        document.querySelectorAll('.page-view').forEach(page => page.classList.add('hidden'));
+        const targetPage = document.getElementById(pageId + '-page');
+        if (targetPage) targetPage.classList.remove('hidden');
+        document.getElementById('page-content').scrollTop = 0;
+    }
+
+    window.onload = () => {
+        // Run the Google Sheets fetch on load
+        fetchShows();
+        
+        const videos = document.querySelectorAll('#splash-screen video');
+        setTimeout(() => {
+            videos.forEach(v => {
+                v.style.transform = 'scale(1.15)';
+                v.play().catch(e => console.log("Auto-play blocked"));
+            });
+        }, 100);
+    };
+</script>
 </body>
 </html>
