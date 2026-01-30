@@ -141,7 +141,7 @@
             max-height: 85vh; 
             display: block;
             margin-bottom: 1.5rem;
-            background: #f0f0f0; 
+            background: #ffffff; 
         }
 
         .video-container {
@@ -361,6 +361,19 @@
         const IMAGES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAEhKGCaI7hBfJ3O6HZB2dFSLMQmW6Fu87798L7-YazMQwm8gW5bOG-lDcjcVl7E-jh5teZk49AIB8/pub?gid=328173456&single=true&output=csv'; 
         const PAINTING_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAEhKGCaI7hBfJ3O6HZB2dFSLMQmW6Fu87798L7-YazMQwm8gW5bOG-lDcjcVl7E-jh5teZk49AIB8/pub?gid=915864699&single=true&output=csv'; 
         
+        /**
+         * Converts Google Drive sharing links to direct image links.
+         */
+        function formatMediaUrl(url) {
+            if (!url) return '';
+            if (url.includes('drive.google.com')) {
+                const idMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+                if (idMatch) return `https://drive.google.com/uc?export=view&id=${idMatch[1]}`;
+            }
+            return url;
+        }
+
+
         function parseCSVLine(line) {
             const result = [];
             let current = '';
@@ -444,6 +457,83 @@
             }
         }
 
+         async function fetchGalleryData(url, containerId, type) {
+            if (!url) return;
+            const container = document.getElementById(containerId);
+            try {
+                const response = await fetch(url);
+                const data = await response.text();
+                const lines = data.split(/\r?\n/);
+                const rows = lines.slice(1);
+                
+                let html = '';
+                rows.forEach(line => {
+                    if (!line.trim()) return;
+                    const cols = parseCSVLine(line);
+                    const rawUrl = cols[0] || '';
+                    const mediaUrl = formatMediaUrl(rawUrl);
+                    const title = cols[1] || 'Untitled';
+                    const info = cols[2] || '';
+
+                    if (type === 'video') {
+                        let videoSrc = mediaUrl;
+                        if (mediaUrl.includes('youtube.com') || mediaUrl.includes('youtu.be')) {
+                            const match = mediaUrl.match(/(?:v=|\/|be\/)([\w-]{11})/);
+                            const videoId = match ? match[1] : '';
+                            videoSrc = `https://www.youtube.com/embed/${videoId}`;
+                        }
+                        html += `
+                            <div class="work-item">
+                                <div class="video-container">
+                                    <iframe src="${videoSrc}" frameborder="0" allowfullscreen></iframe>
+                                </div>
+                                <div class="work-caption"><strong>${title}</strong><br>${info}</div>
+                            </div>
+                        `;
+                    } else if (type === 'recording') {
+                        // Logic: Use Artwork URL from Column D (cols[3])
+                        // If empty, use a vinyl record icon instead of the profile photo.
+                        const explicitArtwork = formatMediaUrl(cols[3]);
+                        const albumArtHtml = explicitArtwork 
+                            ? `<img src="${explicitArtwork}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML=getVinylIcon();">` 
+                            : getVinylIcon();
+
+                        html += `
+                            <li>
+                                <a href="${mediaUrl}" target="_blank" class="music-link flex gap-4 items-center group">
+                                    <div class="w-16 h-16 flex-shrink-0 overflow-hidden artwork-placeholder">
+                                        ${albumArtHtml}
+                                    </div>
+                                    <div class="flex-grow">
+                                        <div class="flex justify-between items-center">
+                                            <div class="font-bold">${title}</div>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-40 group-hover:opacity-100 transition-opacity"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                                        </div>
+                                        <div class="text-xs text-gray-400">${info}</div>
+                                    </div>
+                                </a>
+                            </li>
+                        `;
+                    } else {
+                        html += `
+                            <div class="work-item">
+                                <img src="${mediaUrl}" alt="${title}" loading="lazy" onerror="this.src='https://placehold.co/1000x600/eee/999?text=Image+Loading...';">
+                                <div class="work-caption"><strong>${title}</strong><br>${info}</div>
+                            </div>
+                        `;
+                    }
+                });
+                if (html) container.innerHTML = html;
+            } catch (e) {
+                console.error("Gallery Error:", e);
+            }
+        }
+
+        // Returns a professional vinyl record icon for empty artwork cells
+        function getVinylIcon() {
+            return `<svg viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>`;
+        }
+
         async function fetchShows() {
             const listElement = document.getElementById('shows-list');
             try {
@@ -500,6 +590,7 @@
                 listElement.innerHTML = '<li>Error loading schedule.</li>';
             }
         }
+
 
         function enterSite() {
             document.getElementById('splash-screen').style.opacity = '0';
