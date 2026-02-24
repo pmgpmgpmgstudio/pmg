@@ -25,7 +25,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: opacity 1s ease-in-out;
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             padding: 40px;
         }
 
@@ -87,7 +87,7 @@
             color: black;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.8s ease;
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #main-content.visible {
@@ -437,7 +437,6 @@
                     const info = cols[2] || '';
 
                     if (type === 'home') {
-                        // For the landing page, we just take the first row and update the iframe
                         const videoSrc = getEmbedUrl(rawUrl);
                         html = `<iframe src="${videoSrc}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
                     } else if (type === 'video') {
@@ -555,28 +554,19 @@
                 document.getElementById('main-content').classList.add('visible');
                 // Auto-navigate to home page on entry
                 showPage('home', null);
-            }, 1000);
+            }, 400); // Faster timing for snappier transition
         }
 
         function showPage(pageId, navElement) {
-            // Remove active state from all items
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            
-            // Add active state if a nav element was actually clicked
             if (navElement) {
                 navElement.classList.add('active');
             }
-            
-            // Hide all pages
             document.querySelectorAll('.page-view').forEach(page => page.classList.add('hidden'));
-            
-            // Show target page
             const targetPage = document.getElementById(pageId + '-page');
             if (targetPage) {
                 targetPage.classList.remove('hidden');
             }
-            
-            // Reset scroll position
             document.getElementById('page-content').scrollTop = 0;
         }
 
