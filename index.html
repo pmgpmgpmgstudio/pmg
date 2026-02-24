@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap');
-
+ 
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -260,6 +260,14 @@
             letter-spacing: 0.2em;
             color: #999;
         }
+
+        .artwork-placeholder {
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+        }
     </style>
 </head>
 <body>
@@ -272,7 +280,7 @@
             <div class="grid-item"><video autoplay muted loop playsinline><source src="https://v.ftcdn.net/02/79/11/48/700_F_279114886_H9V9eUAn8F3LREyM6CqVpUf3YqA9n8zN_ST.mp4" type="video/mp4"></video></div>
             <div class="grid-item"><video autoplay muted loop playsinline><source src="https://v.ftcdn.net/03/11/87/43/700_F_311874313_jI8Y1T6QJ7G3N9jK6L0vK1X7Xk9B8H3C_ST.mp4" type="video/mp4"></video></div>
             <div class="enter-container">
-                <button onclick="enterSite()" class="border-2 border-white px-12 py-5 bg-black hover:bg-white hover:text-black transition-all duration-500 uppercase tracking-[0.5em] text-[10px] md:text-sm font-bold z-50 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                <button onclick="enterSite()" class="uppercase tracking-[0.5em] text-[10px] md:text-sm font-bold z-50 hover:opacity-50 transition-opacity">
                     Enter
                 </button>
             </div>
@@ -286,20 +294,31 @@
     <!-- Main Site -->
     <div id="main-content">
         <header class="py-4 px-8 flex flex-row justify-between items-center bg-white sticky top-0 z-10">
-            <div class="branding" onclick="showPage('about', null)">
+            <div class="branding" onclick="showPage('home', null)">
                 <span>Pedro</span>
                 <span>M.</span>
                 <span>Gutierrez</span>
             </div>
             <nav class="flex gap-2">
-                <div class="nav-item active" onclick="showPage('video', this)">Video</div>
-                <div class="nav-item" onclick="showPage('images', this)">Images</div>
-                <div class="nav-item" onclick="showPage('painting', this)">Painting</div>
-                <div class="nav-item" onclick="showPage('music', this)">Music</div>
+                <div class="nav-item active" id="nav-video" onclick="showPage('video', this)">Video</div>
+                <div class="nav-item" id="nav-images" onclick="showPage('images', this)">Image</div>
+                <div class="nav-item" id="nav-painting" onclick="showPage('painting', this)">Painting</div>
+                <div class="nav-item" id="nav-music" onclick="showPage('music', this)">Music</div>
+                <div class="nav-item" id="nav-about" onclick="showPage('about', this)">About</div>
             </nav>
         </header>
 
         <div id="page-content" class="scroll-container">
+            <!-- Home Page (Featured Landing) -->
+            <div id="home-page" class="page-view hidden">
+                <div class="work-item">
+                    <div class="video-container" id="featured-video-wrapper">
+                        <!-- Will be populated by fetchGalleryData with type 'home' -->
+                        <div class="loading-state">Loading featured work...</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- About Page -->
             <div id="about-page" class="page-view hidden">
                 <div class="about-grid">
@@ -320,7 +339,7 @@
                 </div>
             </div>
 
-            <!-- Images Page -->
+            <!-- Image Page -->
             <div id="images-page" class="page-view hidden">
                 <div id="images-container-list">
                     <div class="loading-state">Loading image gallery...</div>
@@ -355,15 +374,13 @@
     </div>
 
     <script>
-        const SHOWS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAEhKGCaI7hBfJ3O6HZB2dFSLMQmW6Fu87798L7-YazMQwm8gW5bOG-lDcjcVl7E-jh5teZk49AIB8/pub?gid=0&single=true&output=csv';
-        const VIDEO_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAEhKGCaI7hBfJ3O6HZB2dFSLMQmW6Fu87798L7-YazMQwm8gW5bOG-lDcjcVl7E-jh5teZk49AIB8/pub?gid=1280174649&single=true&output=csv'; 
-        const RECORDINGS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAEhKGCaI7hBfJ3O6HZB2dFSLMQmW6Fu87798L7-YazMQwm8gW5bOG-lDcjcVl7E-jh5teZk49AIB8/pub?gid=494394231&single=true&output=csv'; // Add your music recordings spreadsheet URL here
-        const IMAGES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAEhKGCaI7hBfJ3O6HZB2dFSLMQmW6Fu87798L7-YazMQwm8gW5bOG-lDcjcVl7E-jh5teZk49AIB8/pub?gid=328173456&single=true&output=csv'; 
-        const PAINTING_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAEhKGCaI7hBfJ3O6HZB2dFSLMQmW6Fu87798L7-YazMQwm8gW5bOG-lDcjcVl7E-jh5teZk49AIB8/pub?gid=915864699&single=true&output=csv'; 
-        
-        /**
-         * Converts Google Drive sharing links to direct image links.
-         */
+        const SHOWS_CSV_URL =      'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAEhKGCaI7hBfJ3O6HZB2dFSLMQmW6Fu87798L7-YazMQwm8gW5bOG-lDcjcVl7E-jh5teZk49AIB8/pub?gid=0&single=true&output=csv';
+        const VIDEO_CSV_URL =      'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAEhKGCaI7hBfJ3O6HZB2dFSLMQmW6Fu87798L7-YazMQwm8gW5bOG-lDcjcVl7E-jh5teZk49AIB8/pub?gid=1280174649&single=true&output=csv'; 
+        const RECORDINGS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAEhKGCaI7hBfJ3O6HZB2dFSLMQmW6Fu87798L7-YazMQwm8gW5bOG-lDcjcVl7E-jh5teZk49AIB8/pub?gid=494394231&single=true&output=csv'; 
+        const IMAGES_CSV_URL =     'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAEhKGCaI7hBfJ3O6HZB2dFSLMQmW6Fu87798L7-YazMQwm8gW5bOG-lDcjcVl7E-jh5teZk49AIB8/pub?gid=328173456&single=true&output=csv'; 
+        const PAINTING_CSV_URL =   'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAEhKGCaI7hBfJ3O6HZB2dFSLMQmW6Fu87798L7-YazMQwm8gW5bOG-lDcjcVl7E-jh5teZk49AIB8/pub?gid=915864699&single=true&output=csv'; 
+        const HOME_CSV_URL =       'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAEhKGCaI7hBfJ3O6HZB2dFSLMQmW6Fu87798L7-YazMQwm8gW5bOG-lDcjcVl7E-jh5teZk49AIB8/pub?gid=45123767&single=true&output=csv'; 
+
         function formatMediaUrl(url) {
             if (!url) return '';
             if (url.includes('drive.google.com')) {
@@ -373,6 +390,18 @@
             return url;
         }
 
+        function getEmbedUrl(url) {
+            let src = formatMediaUrl(url);
+            if (src.includes('youtube.com') || src.includes('youtu.be')) {
+                const match = src.match(/(?:v=|\/|be\/)([\w-]{11})/);
+                return match ? `https://www.youtube.com/embed/${match[1]}` : src;
+            }
+            if (src.includes('vimeo.com')) {
+                const match = src.match(/vimeo.com\/(\d+)/);
+                return match ? `https://player.vimeo.com/video/${match[1]}` : src;
+            }
+            return src;
+        }
 
         function parseCSVLine(line) {
             const result = [];
@@ -403,85 +432,16 @@
                 rows.forEach(line => {
                     if (!line.trim()) return;
                     const cols = parseCSVLine(line);
-                    const mediaUrl = cols[0] || '';
-                    const title = cols[1] || 'Untitled';
-                    const info = cols[2] || '';
-
-                    if (type === 'video') {
-                        let videoSrc = mediaUrl;
-                        if (mediaUrl.includes('youtube.com') || mediaUrl.includes('youtu.be')) {
-                            const match = mediaUrl.match(/(?:v=|\/|be\/)([\w-]{11})/);
-                            const videoId = match ? match[1] : '';
-                            videoSrc = `https://www.youtube.com/embed/${videoId}`;
-                        }
-                        html += `
-                            <div class="work-item">
-                                <div class="video-container">
-                                    <iframe src="${videoSrc}" frameborder="0" allowfullscreen></iframe>
-                                </div>
-                                <div class="work-caption"><strong>${title}</strong><br>${info}</div>
-                            </div>
-                        `;
-                    } else if (type === 'recording') {
-                        // Assuming spreadsheet columns: Link, Title, Platform/Info, CoverImageUrl
-                        const platform = cols[2] || 'Bandcamp';
-                        const coverImg = cols[3] || 'https://placehold.co/200x200/eee/999?text=Cover';
-                        html += `
-                            <li>
-                                <a href="${mediaUrl}" target="_blank" class="music-link flex gap-4 items-center group">
-                                    <div class="w-16 h-16 bg-gray-200 flex-shrink-0">
-                                        <img src="${coverImg}" class="w-full h-full object-cover">
-                                    </div>
-                                    <div class="flex-grow">
-                                        <div class="flex justify-between items-center">
-                                            <div class="font-bold">${title}</div>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-40 group-hover:opacity-100 transition-opacity"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
-                                        </div>
-                                        <div class="text-xs text-gray-400">${platform}</div>
-                                    </div>
-                                </a>
-                            </li>
-                        `;
-                    } else {
-                        html += `
-                            <div class="work-item">
-                                <img src="${mediaUrl}" alt="${title}" loading="lazy" onerror="this.src='https://placehold.co/1000x600/eee/999?text=Image+Not+Found';">
-                                <div class="work-caption"><strong>${title}</strong><br>${info}</div>
-                            </div>
-                        `;
-                    }
-                });
-                if (html) container.innerHTML = html;
-            } catch (e) {
-                console.error("Gallery Error:", e);
-            }
-        }
-
-         async function fetchGalleryData(url, containerId, type) {
-            if (!url) return;
-            const container = document.getElementById(containerId);
-            try {
-                const response = await fetch(url);
-                const data = await response.text();
-                const lines = data.split(/\r?\n/);
-                const rows = lines.slice(1);
-                
-                let html = '';
-                rows.forEach(line => {
-                    if (!line.trim()) return;
-                    const cols = parseCSVLine(line);
                     const rawUrl = cols[0] || '';
-                    const mediaUrl = formatMediaUrl(rawUrl);
                     const title = cols[1] || 'Untitled';
                     const info = cols[2] || '';
 
-                    if (type === 'video') {
-                        let videoSrc = mediaUrl;
-                        if (mediaUrl.includes('youtube.com') || mediaUrl.includes('youtu.be')) {
-                            const match = mediaUrl.match(/(?:v=|\/|be\/)([\w-]{11})/);
-                            const videoId = match ? match[1] : '';
-                            videoSrc = `https://www.youtube.com/embed/${videoId}`;
-                        }
+                    if (type === 'home') {
+                        // For the landing page, we just take the first row and update the iframe
+                        const videoSrc = getEmbedUrl(rawUrl);
+                        html = `<iframe src="${videoSrc}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+                    } else if (type === 'video') {
+                        const videoSrc = getEmbedUrl(rawUrl);
                         html += `
                             <div class="work-item">
                                 <div class="video-container">
@@ -491,8 +451,6 @@
                             </div>
                         `;
                     } else if (type === 'recording') {
-                        // Logic: Use Artwork URL from Column D (cols[3])
-                        // If empty, use a vinyl record icon instead of the profile photo.
                         const explicitArtwork = formatMediaUrl(cols[3]);
                         const albumArtHtml = explicitArtwork 
                             ? `<img src="${explicitArtwork}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML=getVinylIcon();">` 
@@ -500,7 +458,7 @@
 
                         html += `
                             <li>
-                                <a href="${mediaUrl}" target="_blank" class="music-link flex gap-4 items-center group">
+                                <a href="${formatMediaUrl(rawUrl)}" target="_blank" class="music-link flex gap-4 items-center group">
                                     <div class="w-16 h-16 flex-shrink-0 overflow-hidden artwork-placeholder">
                                         ${albumArtHtml}
                                     </div>
@@ -517,7 +475,7 @@
                     } else {
                         html += `
                             <div class="work-item">
-                                <img src="${mediaUrl}" alt="${title}" loading="lazy" onerror="this.src='https://placehold.co/1000x600/eee/999?text=Image+Loading...';">
+                                <img src="${formatMediaUrl(rawUrl)}" alt="${title}" loading="lazy" onerror="this.src='https://placehold.co/1000x600/eee/999?text=Image+Loading...';">
                                 <div class="work-caption"><strong>${title}</strong><br>${info}</div>
                             </div>
                         `;
@@ -529,7 +487,6 @@
             }
         }
 
-        // Returns a professional vinyl record icon for empty artwork cells
         function getVinylIcon() {
             return `<svg viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>`;
         }
@@ -591,25 +548,41 @@
             }
         }
 
-
         function enterSite() {
             document.getElementById('splash-screen').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('splash-screen').style.display = 'none';
                 document.getElementById('main-content').classList.add('visible');
+                // Auto-navigate to home page on entry
+                showPage('home', null);
             }, 1000);
         }
 
         function showPage(pageId, navElement) {
+            // Remove active state from all items
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            if (navElement) navElement.classList.add('active');
+            
+            // Add active state if a nav element was actually clicked
+            if (navElement) {
+                navElement.classList.add('active');
+            }
+            
+            // Hide all pages
             document.querySelectorAll('.page-view').forEach(page => page.classList.add('hidden'));
-            document.getElementById(pageId + '-page').classList.remove('hidden');
+            
+            // Show target page
+            const targetPage = document.getElementById(pageId + '-page');
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+            }
+            
+            // Reset scroll position
             document.getElementById('page-content').scrollTop = 0;
         }
 
         window.onload = () => {
             fetchShows();
+            fetchGalleryData(HOME_CSV_URL, 'featured-video-wrapper', 'home');
             fetchGalleryData(VIDEO_CSV_URL, 'video-container-list', 'video');
             fetchGalleryData(RECORDINGS_CSV_URL, 'recordings-container-list', 'recording');
             fetchGalleryData(IMAGES_CSV_URL, 'images-container-list', 'image');
