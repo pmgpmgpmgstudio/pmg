@@ -25,7 +25,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             padding: 40px;
         }
 
@@ -87,7 +87,7 @@
             color: black;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #main-content.visible {
@@ -300,7 +300,7 @@
                 <span>Gutierrez</span>
             </div>
             <nav class="flex gap-2">
-                <div class="nav-item active" id="nav-video" onclick="showPage('video', this)">Video</div>
+                <div class="nav-item" id="nav-video" onclick="showPage('video', this)">Video</div>
                 <div class="nav-item" id="nav-images" onclick="showPage('images', this)">Image</div>
                 <div class="nav-item" id="nav-painting" onclick="showPage('painting', this)">Painting</div>
                 <div class="nav-item" id="nav-music" onclick="showPage('music', this)">Music</div>
@@ -310,7 +310,7 @@
 
         <div id="page-content" class="scroll-container">
             <!-- Home Page (Featured Landing) -->
-            <div id="home-page" class="page-view hidden">
+            <div id="home-page" class="page-view">
                 <div class="work-item">
                     <div class="video-container" id="featured-video-wrapper">
                         <!-- Will be populated by fetchGalleryData with type 'home' -->
@@ -333,7 +333,7 @@
             </div>
 
             <!-- Video Page -->
-            <div id="video-page" class="page-view">
+            <div id="video-page" class="page-view hidden">
                 <div id="video-container-list">
                     <div class="loading-state">Loading video gallery...</div>
                 </div>
@@ -548,13 +548,18 @@
         }
 
         function enterSite() {
-            document.getElementById('splash-screen').style.opacity = '0';
+            const splash = document.getElementById('splash-screen');
+            const main = document.getElementById('main-content');
+            
+            // Immediate visual trigger
+            splash.style.opacity = '0';
+            main.classList.add('visible');
+            
             setTimeout(() => {
-                document.getElementById('splash-screen').style.display = 'none';
-                document.getElementById('main-content').classList.add('visible');
-                // Auto-navigate to home page on entry
+                splash.style.display = 'none';
+                // Home is already visible due to class adjustments, but let's ensure nav state
                 showPage('home', null);
-            }, 400); // Faster timing for snappier transition
+            }, 200); 
         }
 
         function showPage(pageId, navElement) {
@@ -584,7 +589,7 @@
                     v.style.transform = 'scale(1.15)';
                     v.play().catch(() => {});
                 });
-            }, 100);
+            }, 50);
         };
     </script>
 </body>
