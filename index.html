@@ -101,11 +101,13 @@
 
         .branding {
             line-height: 1.1;
-            font-weight: 500;
+            font-weight: 700;
             font-size: 1.1rem;
             display: flex;
             flex-direction: column;
             cursor: pointer;
+            text-transform: uppercase; 
+            letter-spacing: 0.3em
         }
 
         .nav-item {
@@ -113,7 +115,9 @@
             padding: 2px 10px; 
             transition: all 0.2s ease;
             border: 1px solid transparent;
-            font-size: 0.9rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
         }
 
         .nav-item.active {
@@ -300,11 +304,11 @@
                 <span>Gutierrez</span>
             </div>
             <nav class="flex gap-2 absolute left-1/2 -translate-x-1/2">
+                <div class="nav-item" id="nav-about" onclick="showPage('about', this)">About</div>
                 <div class="nav-item" id="nav-video" onclick="showPage('video', this)">Video</div>
                 <div class="nav-item" id="nav-images" onclick="showPage('images', this)">Image</div>
                 <div class="nav-item" id="nav-painting" onclick="showPage('painting', this)">Painting</div>
                 <div class="nav-item" id="nav-music" onclick="showPage('music', this)">Music</div>
-                <div class="nav-item" id="nav-about" onclick="showPage('about', this)">About</div>
             </nav>
         </header>
 
