@@ -106,7 +106,6 @@
             display: flex;
             flex-direction: column;
             cursor: pointer;
-            text-transform: uppercase; 
             letter-spacing: 0.3em
         }
 
@@ -398,7 +397,7 @@
             let src = formatMediaUrl(url);
             if (src.includes('youtube.com') || src.includes('youtu.be')) {
                 const match = src.match(/(?:v=|\/|be\/)([\w-]{11})/);
-                return match ? `https://www.youtube.com/embed/${match[1]}` : src;
+                return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1` : src;
             }
             if (src.includes('vimeo.com')) {
                 const match = src.match(/vimeo.com\/(\d+)/);
