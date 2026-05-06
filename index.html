@@ -293,13 +293,13 @@
 
     <!-- Main Site -->
     <div id="main-content">
-        <header class="py-4 px-8 flex flex-row justify-between items-center bg-white sticky top-0 z-10">
+        <header class="py-4 px-8 flex flex-row items-center bg-white sticky top-0 z-10 relative">
             <div class="branding" onclick="showPage('home', null)">
                 <span>Pedro</span>
                 <span>M.</span>
                 <span>Gutierrez</span>
             </div>
-            <nav class="flex gap-2 justify-center">
+            <nav class="flex gap-2 absolute left-1/2 -translate-x-1/2">
                 <div class="nav-item" id="nav-video" onclick="showPage('video', this)">Video</div>
                 <div class="nav-item" id="nav-images" onclick="showPage('images', this)">Image</div>
                 <div class="nav-item" id="nav-painting" onclick="showPage('painting', this)">Painting</div>
