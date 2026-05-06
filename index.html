@@ -106,7 +106,6 @@
             display: flex;
             flex-direction: column;
             cursor: pointer;
-            letter-spacing: 0.3em
         }
 
         .nav-item {
@@ -397,7 +396,7 @@
             let src = formatMediaUrl(url);
             if (src.includes('youtube.com') || src.includes('youtu.be')) {
                 const match = src.match(/(?:v=|\/|be\/)([\w-]{11})/);
-                return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1` : src;
+                return match ? `https://www.youtube.com/embed/${match[1]}` : src;
             }
             if (src.includes('vimeo.com')) {
                 const match = src.match(/vimeo.com\/(\d+)/);
@@ -440,7 +439,7 @@
                     const info = cols[2] || '';
 
                     if (type === 'home') {
-                        const videoSrc = getEmbedUrl(rawUrl);
+                        const videoSrc = getEmbedUrl(rawUrl) + '?autoplay=1&mute=1';
                         html = `<iframe src="${videoSrc}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
                     } else if (type === 'video') {
                         const videoSrc = getEmbedUrl(rawUrl);
