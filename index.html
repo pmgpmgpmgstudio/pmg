@@ -101,8 +101,9 @@
 
         .branding {
             line-height: 1.1;
-            font-weight: 700;
+            font-weight: 500;
             font-size: 1.1rem;
+            letter-spacing: 0.05em;
             display: flex;
             flex-direction: column;
             cursor: pointer;
@@ -439,7 +440,7 @@
                     const info = cols[2] || '';
 
                     if (type === 'home') {
-                        const videoSrc = getEmbedUrl(rawUrl) + '?autoplay=1&mute=1';
+                        const videoSrc = getEmbedUrl(rawUrl) + '?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1';
                         html = `<iframe src="${videoSrc}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
                     } else if (type === 'video') {
                         const videoSrc = getEmbedUrl(rawUrl);
