@@ -246,6 +246,7 @@
                 width: 100%;
                 height: 100%;
                 z-index: 0;
+                pointer-events: none;
             }
             .bio-content {
                 text-align: center;
@@ -256,6 +257,7 @@
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
+                object-position: top;
                 opacity: 0.5;
             }
 
@@ -335,12 +337,13 @@
             </div>
 
             <!-- About Page -->
-            <div id="about-page" class="page-view hidden">
+            <div id="about-page" class="page-view hidden" style="position: relative;">
+                <div class="portrait-container">
+                    <img src="assets/pmg_head.JPG" alt="Pedro M. Gutierrez Portrait">
+                </div>
                 <div class="about-grid">
-                    <div class="portrait-container">
-                        <img src="assets/pmg_head.JPG" alt="Pedro M. Gutierrez Portrait">
-                    </div>
-                     <div class="bio-content" style="grid-column: 1 / -1;">
+                    <div></div>
+                    <div class="bio-content">
                         <h2 class="section-title">Bio</h2>
                         <p>Pedro M. Gutierrez is an artist, musician, and engineer from Minneapolis, MN. He is currently based in Milwaukee, WI. His practice includes audio, video, photography, painting, and electronics. His work explores experimental and improvisational approaches, often blurring the boundaries between mediums. As a musician, Pedro is active in diverse projects that span jazz, free improvisation, post-rock, electronic, and noise. Pedro’s artistic ethos is deeply informed by an interest in culture and society—exploring how memory, location, and current events shape contemporary life.</p>
                     </div>
